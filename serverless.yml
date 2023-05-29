@@ -1,0 +1,63 @@
+service: serverless-test-project
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: us-east-1
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:GetItem
+            - dynamodb:Scan
+            - dynamodb:DeleteItem
+          Resource: "arn:aws:dynamodb:us-east-1:*:table/ItemTableNew"
+
+functions:
+  insertItem:
+    handler: src/insertItem.handler
+    events:
+      - httpApi:
+          path: /item
+          method: post
+
+  getItems:
+    handler: src/getItems.handler
+    events:
+      - httpApi:
+          path: /item
+          method: get
+
+  getItem:
+    handler: src/getItem.handler
+    events:
+      - httpApi:
+          path: /item/{id}
+          method: get
+
+  updateItem:
+    handler: src/updateItem.handler
+    events:
+      - httpApi:
+          path: /item/{id}
+          method: put
+          
+
+resources:
+  Resources:
+    ItemTableNew:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ItemTableNew
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        
